@@ -11,11 +11,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.util.LocalTvMode
 
 /**
  * @param refreshing Whether the layout is currently refreshing
  * @param onRefresh Lambda which is invoked when a swipe to refresh gesture is completed.
  * @param enabled Whether the the layout should react to swipe gestures or not.
+ *   Automatically forced to `false` when running in TV mode to prevent D-pad scroll
+ *   events from triggering an unintended refresh.
  * @param indicatorPadding Content padding for the indicator, to inset the indicator in if required.
  * @param content The content containing a vertically scrollable composable.
  */
@@ -28,13 +31,15 @@ fun PullRefresh(
     indicatorPadding: PaddingValues = PaddingValues(0.dp),
     content: @Composable () -> Unit,
 ) {
+    // Disable pull-to-refresh entirely on TV: D-pad UP/DOWN would trigger it accidentally.
+    val isTvMode = LocalTvMode.current
     val state = rememberPullToRefreshState()
     Box(
         modifier = modifier
             .pullToRefresh(
                 isRefreshing = refreshing,
                 state = state,
-                enabled = enabled,
+                enabled = enabled && !isTvMode,
                 onRefresh = onRefresh,
             ),
     ) {
@@ -51,3 +56,4 @@ fun PullRefresh(
         )
     }
 }
+

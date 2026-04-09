@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -106,6 +107,7 @@ import eu.kanade.tachiyomi.ui.player.ExternalIntents
 import eu.kanade.tachiyomi.ui.player.PlayerActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
+import eu.kanade.tachiyomi.util.system.isTv
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.updaterEnabled
@@ -129,6 +131,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.util.LocalTvMode
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -182,6 +185,9 @@ class MainActivity : BaseActivity() {
         setComposeContent {
             val context = LocalContext.current
 
+            // Disponibiliza o modo TV para toda a árvore de composables
+            val tvMode = remember { isTv(context) }
+
             var incognito by remember { mutableStateOf(getMangaIncognitoState.await(null)) }
             var incognitoAnime by remember { mutableStateOf(getAnimeIncognitoState.await(null)) }
             val downloadOnly by preferences.downloadedOnly.collectAsState()
@@ -205,6 +211,7 @@ class MainActivity : BaseActivity() {
                 )
             }
 
+            CompositionLocalProvider(LocalTvMode provides tvMode) {
             Navigator(
                 screen = HomeScreen,
                 disposeBehavior = NavigatorDisposeBehavior(
@@ -320,6 +327,7 @@ class MainActivity : BaseActivity() {
                 ShowOnboarding()
                 ShowDeviceModeChooser()
             }
+            } // end CompositionLocalProvider(LocalTvMode)
 
             var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG) }
             if (showChangelog) {
