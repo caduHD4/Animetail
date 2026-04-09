@@ -7,6 +7,7 @@ import android.app.SearchManager
 import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -62,6 +63,8 @@ import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.connections.service.ConnectionsPreferences
 import eu.kanade.domain.source.anime.interactor.GetAnimeIncognitoState
 import eu.kanade.domain.source.manga.interactor.GetMangaIncognitoState
+import eu.kanade.domain.ui.UiPreferences
+import eu.kanade.domain.ui.model.DeviceMode
 import eu.kanade.presentation.components.AppStateBanners
 import eu.kanade.presentation.components.DownloadedOnlyBannerBackgroundColor
 import eu.kanade.presentation.components.IncognitoModeBannerBackgroundColor
@@ -93,6 +96,7 @@ import eu.kanade.tachiyomi.ui.browse.manga.source.globalsearch.GlobalMangaSearch
 import eu.kanade.tachiyomi.ui.deeplink.DeepLinkScreenType
 import eu.kanade.tachiyomi.ui.deeplink.anime.DeepLinkAnimeScreen
 import eu.kanade.tachiyomi.ui.deeplink.manga.DeepLinkMangaScreen
+import eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen
 import eu.kanade.tachiyomi.ui.entries.anime.AnimeScreen
 import eu.kanade.tachiyomi.ui.entries.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
@@ -134,6 +138,7 @@ class MainActivity : BaseActivity() {
 
     private val libraryPreferences: LibraryPreferences by injectLazy()
     private val preferences: BasePreferences by injectLazy()
+    private val uiPreferences: UiPreferences by injectLazy()
 
     private val animeDownloadCache: AnimeDownloadCache by injectLazy()
     private val downloadCache: MangaDownloadCache by injectLazy()
@@ -162,6 +167,9 @@ class MainActivity : BaseActivity() {
         val splashScreen = if (isLaunch) installSplashScreen() else null
 
         super.onCreate(savedInstanceState)
+
+        // Aplica orientação landscape ao detectar/escolher Modo TV
+        applyTvOrientation()
 
         val didMigration = Migrator.awaitAndRelease()
 
@@ -310,6 +318,7 @@ class MainActivity : BaseActivity() {
 
                 CheckForUpdates()
                 ShowOnboarding()
+                ShowDeviceModeChooser()
             }
 
             var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG) }
@@ -432,6 +441,44 @@ class MainActivity : BaseActivity() {
             if (!preferences.shownOnboardingFlow.get() && navigator.lastItem !is OnboardingScreen) {
                 navigator.push(OnboardingScreen())
             }
+        }
+    }
+
+    /**
+     * Exibe a tela de escolha do modo do dispositivo (Mobile / TV) na primeira execução.
+     *
+     * Após o onboarding ser concluído, verifica se o seletor já foi mostrado.
+     * Se não foi, empurra a DeviceModeChooserScreen para o navigator.
+     */
+    @Composable
+    private fun ShowDeviceModeChooser() {
+        val navigator = LocalNavigator.currentOrThrow
+
+        LaunchedEffect(Unit) {
+            // Aguarda o onboarding ser concluído antes de exibir o seletor
+            if (
+                preferences.shownOnboardingFlow.get() &&
+                !uiPreferences.shownDeviceModeChooser.get() &&
+                navigator.lastItem !is eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen
+            ) {
+                navigator.push(eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen())
+            }
+        }
+    }
+
+    /**
+     * Aplica a orientação correta de acordo com o modo escolhido pelo usuário.
+     *
+     * - Modo TV → força landscape (melhor para uso com controle remoto).
+     * - Modo Mobile → orientação livre (padrão do sistema).
+     */
+    private fun applyTvOrientation() {
+        val isTvMode = uiPreferences.shownDeviceModeChooser.get() &&
+            uiPreferences.deviceMode.get() == DeviceMode.TV
+        requestedOrientation = if (isTvMode) {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 

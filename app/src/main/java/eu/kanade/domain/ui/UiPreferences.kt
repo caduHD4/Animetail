@@ -1,6 +1,7 @@
 package eu.kanade.domain.ui
 
 import eu.kanade.domain.ui.model.AppTheme
+import eu.kanade.domain.ui.model.DeviceMode
 import eu.kanade.domain.ui.model.NavStyle
 import eu.kanade.domain.ui.model.StartScreen
 import eu.kanade.domain.ui.model.TabletUiMode
@@ -45,6 +46,12 @@ class UiPreferences(
         preferenceStore.getBoolean("pref_show_chapter_release_timestamp", true)
 
     val tabletUiMode: Preference<TabletUiMode> = preferenceStore.getEnum("tablet_ui_mode", TabletUiMode.AUTOMATIC)
+
+    /** Modo do dispositivo escolhido pelo usuário: mobile ou TV. */
+    val deviceMode: Preference<DeviceMode> = preferenceStore.getEnum("device_mode", DeviceMode.MOBILE)
+
+    /** Indica se a tela de escolha de modo já foi exibida ao usuário. */
+    val shownDeviceModeChooser: Preference<Boolean> = preferenceStore.getBoolean("device_mode_chooser_shown", false)
 
     val startScreen: Preference<StartScreen> = preferenceStore.getEnum("start_screen", StartScreen.ANIME)
 

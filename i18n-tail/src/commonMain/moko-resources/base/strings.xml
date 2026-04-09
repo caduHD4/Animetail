@@ -418,4 +418,15 @@
     <string name="pref_tracking_sync_enhanced">Sync progress from enhanced trackers</string>
     <string name="pref_smart_sync_tracker">Smart sync seasons</string>
     <string name="pref_smart_sync_tracker_summary">Skip completed items and stop at entry in progress</string>
+
+    <!-- Modo do dispositivo (Mobile / TV) -->
+    <string name="pref_category_device_mode">Device Mode</string>
+    <string name="pref_device_mode">Device Mode</string>
+    <string name="pref_device_mode_summary">Choose how you use Animetail</string>
+    <string name="device_mode_mobile">📱 Mobile (phone/tablet)</string>
+    <string name="device_mode_tv">📺 TV Mode (Android TV / remote)</string>
+    <string name="device_mode_chooser_title">How will you use Animetail?</string>
+    <string name="device_mode_chooser_subtitle">You can change this later in Settings → Appearance</string>
+    <string name="device_mode_mobile_desc">Touch interface optimised for phones and tablets</string>
+    <string name="device_mode_tv_desc">D-pad navigation optimised for Android TV, Google TV and Fire TV</string>
 </resources>

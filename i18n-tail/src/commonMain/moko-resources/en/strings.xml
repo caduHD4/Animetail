@@ -310,4 +310,15 @@
   <string name="pref_source_related_animes_summary">Show source-website\'s Suggestions while viewing entry</string>
   <string name="pref_source_navigation">Replace latest button</string>
   <string name="pref_source_navigation_summery">Replace latest button with a custom browse view that includes both latest and browse</string>
+
+  <!-- Modo do dispositivo (Mobile / TV) -->
+  <string name="pref_category_device_mode">Device Mode</string>
+  <string name="pref_device_mode">Device Mode</string>
+  <string name="pref_device_mode_summary">Choose how you use Animetail</string>
+  <string name="device_mode_mobile">📱 Mobile (phone/tablet)</string>
+  <string name="device_mode_tv">📺 TV Mode (Android TV / remote)</string>
+  <string name="device_mode_chooser_title">How will you use Animetail?</string>
+  <string name="device_mode_chooser_subtitle">You can change this later in Settings → Appearance</string>
+  <string name="device_mode_mobile_desc">Touch interface optimised for phones and tablets</string>
+  <string name="device_mode_tv_desc">D-pad navigation optimised for Android TV, Google TV and Fire TV</string>
 </resources>
