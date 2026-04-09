@@ -327,7 +327,7 @@ class MainActivity : BaseActivity() {
                 ShowOnboarding()
                 ShowDeviceModeChooser()
             }
-            } // end CompositionLocalProvider(LocalTvMode)
+            }
 
             var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG) }
             if (showChangelog) {
