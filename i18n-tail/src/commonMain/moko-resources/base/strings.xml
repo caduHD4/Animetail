@@ -419,7 +419,7 @@
     <string name="pref_smart_sync_tracker">Smart sync seasons</string>
     <string name="pref_smart_sync_tracker_summary">Skip completed items and stop at entry in progress</string>
 
-    <!-- Modo do dispositivo (Mobile / TV) -->
+    <!-- Device mode (Mobile / TV) -->
     <string name="pref_category_device_mode">Device Mode</string>
     <string name="pref_device_mode">Device Mode</string>
     <string name="pref_device_mode_summary">Choose how you use Animetail</string>

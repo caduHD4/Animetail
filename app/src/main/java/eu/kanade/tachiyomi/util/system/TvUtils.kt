@@ -34,7 +34,7 @@ fun isTv(context: Context): Boolean {
  */
 fun isTvHardware(context: Context): Boolean {
     val uiModeManager = context.getSystemService(UiModeManager::class.java)
-    if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+    if (uiModeManager.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) {
         return true
     }
     // Detecta set-top boxes Android que não reportam UI_MODE_TYPE_TELEVISION
