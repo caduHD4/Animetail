@@ -455,17 +455,17 @@ class MainActivity : BaseActivity() {
     /**
      * Exibe a tela de escolha do modo do dispositivo (Mobile / TV) na primeira execução.
      *
-     * Após o onboarding ser concluído, verifica se o seletor já foi mostrado.
-     * Se não foi, empurra a DeviceModeChooserScreen para o navigator.
+     * Observa o estado do onboarding reativamente para que o seletor seja mostrado
+     * logo após o onboarding ser concluído (mesmo na primeira abertura do app).
      */
     @Composable
     private fun ShowDeviceModeChooser() {
         val navigator = LocalNavigator.currentOrThrow
+        val onboardingDone by preferences.shownOnboardingFlow.collectAsState()
 
-        LaunchedEffect(Unit) {
-            // Aguarda o onboarding ser concluído antes de exibir o seletor
+        LaunchedEffect(onboardingDone) {
             if (
-                preferences.shownOnboardingFlow.get() &&
+                onboardingDone &&
                 !uiPreferences.shownDeviceModeChooser.get() &&
                 navigator.lastItem !is eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen
             ) {
