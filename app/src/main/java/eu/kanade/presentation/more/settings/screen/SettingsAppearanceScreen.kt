@@ -13,6 +13,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
+import eu.kanade.domain.ui.model.DeviceMode
 import eu.kanade.domain.ui.model.NavStyle
 import eu.kanade.domain.ui.model.StartScreen
 import eu.kanade.domain.ui.model.TabletUiMode
@@ -48,6 +49,7 @@ object SettingsAppearanceScreen : SearchableSettings {
         return listOf(
             getThemeGroup(uiPreferences = uiPreferences),
             getDisplayGroup(uiPreferences = uiPreferences),
+            getDeviceModeGroup(uiPreferences = uiPreferences),
             // SY -->
             getNavbarGroup(uiPreferences = uiPreferences),
             getForkGroup(uiPreferences = uiPreferences),
@@ -208,10 +210,41 @@ object SettingsAppearanceScreen : SearchableSettings {
         )
     }
 
+    /**
+     * Grupo de preferências para o modo do dispositivo (Mobile / TV).
+     *
+     * Permite ao usuário alterar o modo de uso a qualquer momento.
+     * A mudança requer reinício do app para ter pleno efeito.
+     */
+    @Composable
+    private fun getDeviceModeGroup(
+        uiPreferences: UiPreferences,
+    ): Preference.PreferenceGroup {
+        val context = LocalContext.current
+
+        return Preference.PreferenceGroup(
+            title = stringResource(TLMR.strings.pref_category_device_mode),
+            preferenceItems = persistentListOf(
+                Preference.PreferenceItem.ListPreference(
+                    preference = uiPreferences.deviceMode,
+                    entries = DeviceMode.entries
+                        .associateWith { stringResource(it.titleRes) }
+                        .toImmutableMap(),
+                    title = stringResource(TLMR.strings.pref_device_mode),
+                    subtitle = stringResource(TLMR.strings.pref_device_mode_summary),
+                    onValueChanged = {
+                        uiPreferences.shownDeviceModeChooser.set(true)
+                        context.toast(MR.strings.requires_app_restart)
+                        true
+                    },
+                ),
+            ),
+        )
+    }
+
     // SY -->
     @Composable
     fun getForkGroup(uiPreferences: UiPreferences): Preference.PreferenceGroup {
-//        val previewsRowCount by uiPreferences.previewsRowCount().collectAsState()
         // KMK -->
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
         val relatedMangasInOverflow by uiPreferences.expandRelatedAnimes.collectAsState()

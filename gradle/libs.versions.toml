@@ -7,6 +7,7 @@ androidx-annotation = "1.9.1"
 androidx-appCompat = "1.7.1"
 androidx-benchmark = "1.4.1"
 androidx-biometric = "1.2.0-alpha05"
+androidx-leanback = "1.2.0-alpha02"
 androidx-compose-bom = "2026.03.01"
 androidx-constraintLayout = "2.2.1"
 androidx-core = "1.18.0"
@@ -83,6 +84,8 @@ android-gradle = { module = "com.android.tools.build:gradle", version.ref = "and
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity-compose" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "androidx-annotation" }
 androidx-appCompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appCompat" }
+androidx-leanback = { module = "androidx.leanback:leanback", version.ref = "androidx-leanback" }
+androidx-leanback-preference = { module = "androidx.leanback:leanback-preference", version.ref = "androidx-leanback" }
 androidx-benchmark-macroJunit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
 androidx-biometric = { module = "androidx.biometric:biometric-ktx", version.ref = "androidx-biometric" }
 androidx-compose-animation = { module = "androidx.compose.animation:animation" }

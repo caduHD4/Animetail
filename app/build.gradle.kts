@@ -224,6 +224,10 @@ dependencies {
     implementation(libs.androidx.profileInstaller)
     implementation(aniyomilibs.mediasession)
 
+    // Leanback para suporte ao Android TV
+    implementation(libs.androidx.leanback)
+    implementation(libs.androidx.leanback.preference)
+
     implementation(libs.bundles.androidx.lifecycle)
 
     // Job scheduling

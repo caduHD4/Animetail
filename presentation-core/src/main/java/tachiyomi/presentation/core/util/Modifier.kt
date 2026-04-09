@@ -68,6 +68,11 @@ fun Modifier.runOnEnterKeyPressed(action: () -> Unit): Modifier = this.onPreview
 /**
  * For TextField on AppBar, this modifier will request focus
  * to the element the first time it's composed.
+ *
+ * On TV (D-pad) mode, only focus is requested — the soft keyboard popup is
+ * suppressed by not invoking the keyboard controller.  The system IME on
+ * Android TV only appears when the user explicitly invokes it, so this
+ * gives D-pad focus without an intrusive virtual keyboard.
  */
 fun Modifier.showSoftKeyboard(show: Boolean): Modifier = if (show) {
     composed {

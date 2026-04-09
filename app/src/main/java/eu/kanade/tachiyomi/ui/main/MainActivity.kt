@@ -7,6 +7,7 @@ import android.app.SearchManager
 import android.app.assist.AssistContent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -35,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,6 +64,8 @@ import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.connections.service.ConnectionsPreferences
 import eu.kanade.domain.source.anime.interactor.GetAnimeIncognitoState
 import eu.kanade.domain.source.manga.interactor.GetMangaIncognitoState
+import eu.kanade.domain.ui.UiPreferences
+import eu.kanade.domain.ui.model.DeviceMode
 import eu.kanade.presentation.components.AppStateBanners
 import eu.kanade.presentation.components.DownloadedOnlyBannerBackgroundColor
 import eu.kanade.presentation.components.IncognitoModeBannerBackgroundColor
@@ -93,6 +97,7 @@ import eu.kanade.tachiyomi.ui.browse.manga.source.globalsearch.GlobalMangaSearch
 import eu.kanade.tachiyomi.ui.deeplink.DeepLinkScreenType
 import eu.kanade.tachiyomi.ui.deeplink.anime.DeepLinkAnimeScreen
 import eu.kanade.tachiyomi.ui.deeplink.manga.DeepLinkMangaScreen
+import eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen
 import eu.kanade.tachiyomi.ui.entries.anime.AnimeScreen
 import eu.kanade.tachiyomi.ui.entries.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.home.HomeScreen
@@ -102,6 +107,7 @@ import eu.kanade.tachiyomi.ui.player.ExternalIntents
 import eu.kanade.tachiyomi.ui.player.PlayerActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
+import eu.kanade.tachiyomi.util.system.isTv
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.system.updaterEnabled
@@ -125,6 +131,7 @@ import tachiyomi.domain.library.service.LibraryPreferences
 import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.util.LocalTvMode
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -134,6 +141,7 @@ class MainActivity : BaseActivity() {
 
     private val libraryPreferences: LibraryPreferences by injectLazy()
     private val preferences: BasePreferences by injectLazy()
+    private val uiPreferences: UiPreferences by injectLazy()
 
     private val animeDownloadCache: AnimeDownloadCache by injectLazy()
     private val downloadCache: MangaDownloadCache by injectLazy()
@@ -163,6 +171,9 @@ class MainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
+        // Aplica orientação landscape ao detectar/escolher Modo TV
+        applyTvOrientation()
+
         val didMigration = Migrator.awaitAndRelease()
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -173,6 +184,9 @@ class MainActivity : BaseActivity() {
 
         setComposeContent {
             val context = LocalContext.current
+
+            // Disponibiliza o modo TV para toda a árvore de composables
+            val tvMode = remember { isTv(context) }
 
             var incognito by remember { mutableStateOf(getMangaIncognitoState.await(null)) }
             var incognitoAnime by remember { mutableStateOf(getAnimeIncognitoState.await(null)) }
@@ -197,6 +211,7 @@ class MainActivity : BaseActivity() {
                 )
             }
 
+            CompositionLocalProvider(LocalTvMode provides tvMode) {
             Navigator(
                 screen = HomeScreen,
                 disposeBehavior = NavigatorDisposeBehavior(
@@ -310,6 +325,8 @@ class MainActivity : BaseActivity() {
 
                 CheckForUpdates()
                 ShowOnboarding()
+                ShowDeviceModeChooser()
+            }
             }
 
             var showChangelog by remember { mutableStateOf(didMigration && !BuildConfig.DEBUG) }
@@ -432,6 +449,44 @@ class MainActivity : BaseActivity() {
             if (!preferences.shownOnboardingFlow.get() && navigator.lastItem !is OnboardingScreen) {
                 navigator.push(OnboardingScreen())
             }
+        }
+    }
+
+    /**
+     * Exibe a tela de escolha do modo do dispositivo (Mobile / TV) na primeira execução.
+     *
+     * Observa o estado do onboarding reativamente para que o seletor seja mostrado
+     * logo após o onboarding ser concluído (mesmo na primeira abertura do app).
+     */
+    @Composable
+    private fun ShowDeviceModeChooser() {
+        val navigator = LocalNavigator.currentOrThrow
+        val onboardingDone by preferences.shownOnboardingFlow.collectAsState()
+
+        LaunchedEffect(onboardingDone) {
+            if (
+                onboardingDone &&
+                !uiPreferences.shownDeviceModeChooser.get() &&
+                navigator.lastItem !is eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen
+            ) {
+                navigator.push(eu.kanade.tachiyomi.ui.devicemode.DeviceModeChooserScreen())
+            }
+        }
+    }
+
+    /**
+     * Aplica a orientação correta de acordo com o modo escolhido pelo usuário.
+     *
+     * - Modo TV → força landscape (melhor para uso com controle remoto).
+     * - Modo Mobile → orientação livre (padrão do sistema).
+     */
+    private fun applyTvOrientation() {
+        val isTvMode = uiPreferences.shownDeviceModeChooser.get() &&
+            uiPreferences.deviceMode.get() == DeviceMode.TV
+        requestedOrientation = if (isTvMode) {
+            ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 
